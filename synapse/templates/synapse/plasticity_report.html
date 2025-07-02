@@ -13,21 +13,44 @@
       padding: 2em;
     }
     .container {
-      max-width: 720px;
-      margin: auto;
+      max-width: 600px;
+      margin: 0 auto;
       background: white;
-      padding: 2em;
+      padding: 2em 1.2em;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .section {
+      max-width: 540px;
+      margin: 0 auto 1.5em auto;
+      background: #f8fafc;
+      border-radius: 6px;
+      padding: 1.1em 1.2em 1.2em 1.2em;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
     }
     h1 {
       margin-top: 0;
       color: #345;
     }
     h2 {
-      margin: 1.4em 0 0.5em;
-      font-size: 1.2em;
-      color: #2a6;
+      margin: 2em 0 0.7em;
+      font-size: 1.15em;
+      color: #345;
+      border-bottom: 1px solid #e0e0e0;
+      padding-bottom: 0.2em;
+      letter-spacing: 0.01em;
+    }
+    .section-desc {
+      font-size: 0.97em;
+      color: #5a5a5a;
+      margin-bottom: 0.7em;
+    }
+    .section {
+      background: #f8fafc;
+      border-radius: 6px;
+      padding: 1.1em 1.5em 1.2em 1.5em;
+      margin-bottom: 1.5em;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
     }
     dl {
       margin: 0;
@@ -45,69 +68,588 @@
 </head>
 <body>
   <div class="container">
-    <h1>Synaptic State: Synapse {{ synapse.pk }}</h1>
+    <!-- Top-level summary/status area -->
+    <div style="max-width:540px; margin:0 auto 2em auto; background:#f5f7fa; border-radius:7px; box-shadow:0 1px 2px rgba(0,0,0,0.03); padding:1.2em 1.5em 1.1em 1.5em;">
+      <h2 style="font-size:1.1em; color:#345; border:none; margin:0 0 0.7em 0; padding:0;">Current Synapse State</h2>
+      {% if last_action %}
+        <div style="background:#e3f2fd; color:#1565c0; border-radius:5px; padding:0.6em 1em; margin-bottom:1em; font-size:1em;">
+          <b>Last action:</b> {{ last_action }}
+        </div>
+      {% endif %}
+      <div style="display:flex; flex-wrap:wrap; gap:1.5em 2.5em; font-size:1em;">
+        <div><b>Membrane:</b> {{ synapse.membrane.potential }} mV
+          {% if synapse.membrane.potential > synapse.membrane.rest_potential %}<span style="color:#2a6;">(Depolarized)</span>{% elif synapse.membrane.potential < synapse.membrane.rest_potential %}<span style="color:#b23c17;">(Hyperpolarized)</span>{% else %}<span style="color:#888;">(At rest)</span>{% endif %}
+        </div>
+        <div><b>Cleft Glutamate:</b> {{ synapse.cleft.glutamate }} mM</div>
+        <div><b>DA Level:</b> {{ synapse.da_cleft.dopamine }} mM</div>
+        <div><b>NMDA:</b> {% if synapse.nmda.mg_blocked %}<span style="color:#b23c17;">Blocked</span>{% else %}<span style="color:#2a6;">Unblocked</span>{% endif %}</div>
+        <div><b>Spine Ca²⁺:</b> {{ synapse.spine.ca_concentration }} µM</div>
+        <div><b>Tag:</b> {% if synapse.tag.tagged %}<span style="color:#2a6;">Set</span>{% else %}<span style="color:#888;">Unset</span>{% endif %}</div>
+      </div>
+    </div>
+    <!-- Removed SVG diagram as requested -->
 
-    <h2>Weight & Plasticity</h2>
-    <dl>
-      <dt>Weight</dt>
-      <dd>{{ synapse.weight }}</dd>
-      <dt>LTP Threshold</dt>
-      <dd>{{ synapse.stdp_params.ltp_threshold }}</dd>
-      <dt>LTD Threshold</dt>
-      <dd>{{ synapse.stdp_params.ltd_threshold }}</dd>
-    </dl>
+    <div class="section">
+      <h2>Synaptic Cleft <span title="The space between neurons where neurotransmitters are released.">🛈</span></h2>
+      <div class="section-desc">Glutamate is released here to signal the postsynaptic neuron.</div>
+      <dl>
+        <dt title="Current glutamate concentration in the cleft.">Glutamate</dt>
+        <dd>{{ synapse.cleft.glutamate }} mM <span style="color:#888; font-size:0.9em;">(min: {{ computed.cleft_min }}, max: {{ computed.cleft_max }})</span></dd>
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>Computed glutamate:</b> {{ computed.cleft_glutamate }}<br>
+          <b>is_active:</b> {{ computed.cleft_is_active }}<br>
+          <b>Min:</b> {{ computed.cleft_min }}<br>
+          <b>Max:</b> {{ computed.cleft_max }}
+        </dd>
+        {% endif %}
+        <dt title="How quickly glutamate is cleared from the cleft.">Clear Rate</dt>
+        <dd>{{ synapse.cleft.clear_rate }} mM/tick</dd>
+        <dt title="Is the cleft currently active (has glutamate)?">Active</dt>
+        <dd>
+          {% if computed.cleft_is_active %}
+            <span style="color:#2a6;">Yes</span> <span title="Glutamate present in cleft">&#10003;</span>
+          {% else %}
+            <span style="color:#888;">No</span> <span title="Cleft is clear">&#10007;</span>
+          {% endif %}
+        </dd>
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>Computed is_active:</b> {{ computed.cleft_is_active }}<br>
+          <b>Min:</b> {{ computed.cleft_min }}<br>
+          <b>Max:</b> {{ computed.cleft_max }}
+        </dd>
+        {% endif %}
+      </dl>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="cleft_release">
+        <input type="number" step="0.01" name="amount" value="1.2" style="width:5em;" title="Amount of glutamate to release (mM)"> mM
+        <button type="submit" title="Release glutamate into the cleft">Release Glutamate</button>
+      </form>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="cleft_clear">
+        <button type="submit" title="Clear glutamate from the cleft">Clear Glutamate</button>
+      </form>
+    </div>
+    </div>
+    <form method="post" style="display:inline;">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="cleft_clear">
+      <button type="submit">Clear Glutamate</button>
+    </form>
 
-    <h2>Calcium Dynamics</h2>
-    <dl>
-      <dt>Ca²⁺ Concentration</dt>
-      <dd>{{ synapse.spine.ca_concentration }} µM</dd>
-      <dt>Ca²⁺ Sensitivity</dt>
-      <dd>{{ synapse.spine.ca_sensitivity }}</dd>
-    </dl>
 
-    <h2>Neurotransmitters</h2>
-    <dl>
-      <dt>Glutamate</dt>
-      <dd>{{ synapse.cleft.glutamate }} mM</dd>
-      <dt>Dopamine</dt>
-      <dd>{{ synapse.da_cleft.dopamine }} mM</dd>
-    </dl>
+    <div class="section">
+      <h2>PostSynaptic Membrane <span title="The membrane of the receiving neuron, where electrical changes occur.">🛈</span></h2>
+      <div class="section-desc">Receives the signal and changes its voltage in response to neurotransmitter binding.</div>
+      <dl>
+        <dt title="The baseline voltage of the membrane.">Rest Potential</dt>
+        <dd>{{ synapse.membrane.rest_potential }} mV</dd>
+        <dt title="Current membrane voltage.">Potential</dt>
+        <dd>{{ synapse.membrane.potential }} mV <span style="color:#888; font-size:0.9em;">(min: {{ computed.membrane_min }}, max: {{ computed.membrane_max }})</span>
+          {% if computed.membrane_depolarized %}
+            <span style="color:#2a6; font-size:0.9em;">(Depolarized)</span>
+          {% else %}
+            <span style="color:#888; font-size:0.9em;">(At rest)</span>
+          {% endif %}
+        </dd>
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>Computed potential:</b> {{ computed.membrane_potential }}<br>
+          <b>is_depolarized:</b> {{ computed.membrane_depolarized }}<br>
+          <b>Min:</b> {{ computed.membrane_min }}<br>
+          <b>Max:</b> {{ computed.membrane_max }}
+        </dd>
+        {% endif %}
+        <dt title="Change in voltage from rest.">Depolarization</dt>
+        <dd>{{ synapse.membrane.depolarization }} mV</dd>
+        <dt title="Is the membrane active (depolarized)?">Active</dt>
+        <dd>
+          {% if computed.membrane_depolarized %}
+            <span style="color:#2a6;">Yes</span> <span title="Depolarized">&#10003;</span>
+          {% else %}
+            <span style="color:#888;">No</span> <span title="Not depolarized">&#10007;</span>
+          {% endif %}
+        </dd>
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>Computed is_depolarized:</b> {{ computed.membrane_depolarized }}<br>
+          <b>Min:</b> {{ computed.membrane_min }}<br>
+          <b>Max:</b> {{ computed.membrane_max }}
+        </dd>
+        {% endif %}
+      </dl>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="membrane_depolarize">
+        <button type="submit" title="Depolarize the membrane (increase voltage)">Depolarize</button>
+      </form>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="membrane_reset">
+        <button type="submit" title="Reset membrane to resting potential">Reset Membrane</button>
+      </form>
+    </div>
 
-    <h2>Receptor States</h2>
-    <dl>
-      <dt>NMDA Mg²⁺ Blocked</dt>
-      <dd>{{ synapse.nmda.mg_blocked }}</dd>
-      <dt>Dopamine Receptor Bound</dt>
-      <dd>{{ synapse.da_receptor.bound }}</dd>
-    </dl>
 
-    <h2>AMPAR Pools</h2>
-    <dl>
-      <dt>PSD AMPAR Count</dt>
-      <dd>{{ synapse.psd.ampa_count }}</dd>
-      <dt>Endosomal AMPAR Pool</dt>
-      <dd>{{ synapse.endosome.pool_count }}</dd>
-    </dl>
+    <div class="section">
+      <h2>NMDA Receptor <span title="A receptor that allows Ca²⁺ influx when both glutamate is present and the membrane is depolarized.">🛈</span></h2>
+      <div class="section-desc">Coincidence detector: opens only if glutamate is present and the membrane is depolarized.</div>
+      <dl>
+        <dt title="Is the channel blocked by Mg²⁺?">Mg²⁺ Blocked</dt>
+        <dd>
+          {% if computed.nmda_blocked %}
+            <span style="color:#b23c17;">Yes</span> <span title="Blocked">&#10007;</span>
+          {% else %}
+            <span style="color:#2a6;">No</span> <span title="Unblocked">&#10003;</span>
+          {% endif %}
+        </dd>
+        <dt title="Glutamate concentration required to open.">Glutamate Threshold</dt>
+        <dd>{{ synapse.nmda.glutamate_thr }} mM</dd>
+        <dt title="Voltage required to open.">Voltage Threshold</dt>
+        <dd>{{ synapse.nmda.voltage_thr }} mV</dd>
+        <dt title="Is the NMDA receptor open?">Open</dt>
+        <dd>
+          {% if computed.nmda_open %}
+            <span style="color:#2a6;">Yes</span> <span title="Open">&#10003;</span>
+          {% else %}
+            <span style="color:#888;">No</span> <span title="Closed">&#10007;</span>
+          {% endif %}
+        </dd>
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>is_open:</b> {{ computed.nmda_open }}<br>
+          <b>is_blocked:</b> {{ computed.nmda_blocked }}<br>
+          <b>ca_conductance:</b> {{ computed.nmda_ca_conductance }}<br>
+          <b>Min:</b> {{ computed.nmda_min }}<br>
+          <b>Max:</b> {{ computed.nmda_max }}
+        </dd>
+        {% endif %}
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>Computed is_open:</b> {{ computed.nmda_open }}<br>
+          <b>Blocked:</b> {{ computed.nmda_blocked }}<br>
+          <b>Ca conductance:</b> {{ computed.nmda_ca_conductance }}<br>
+          <b>Min:</b> {{ computed.nmda_min }}<br>
+          <b>Max:</b> {{ computed.nmda_max }}
+        </dd>
+        {% endif %}
+      </dl>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="nmda_reset">
+        <button type="submit" title="Reset NMDA receptor to initial state">Reset NMDA</button>
+      </form>
+    </div>
 
-    <h2>Tag & Consolidation</h2>
-    <dl>
-      <dt>Tagged</dt>
-      <dd>{{ synapse.tag.tagged }}</dd>
-      <dt>Time Tagged</dt>
-      <dd>{{ synapse.tag.time_tagged|default:"–" }}</dd>
-      <dt>Available Proteins</dt>
-      <dd>{{ synapse.pool.available }}</dd>
-    </dl>
 
-    <h2>Astrocyte Homeostasis</h2>
-    <dl>
-      <dt>TNFα</dt>
-      <dd>{{ synapse.astrocyte.tnf_alpha }}</dd>
-      <dt>D-serine</dt>
-      <dd>{{ synapse.astrocyte.d_serine }}</dd>
-      <dt>ATP</dt>
-      <dd>{{ synapse.astrocyte.atp }}</dd>
-    </dl>
+    <div class="section">
+      <h2>Spine Head <span title="Small protrusion on the dendrite where Ca²⁺ enters and triggers plasticity.">🛈</span></h2>
+      <div class="section-desc">Entry point for Ca²⁺, which is crucial for synaptic changes.</div>
+      <dl>
+        <dt title="Current calcium concentration in the spine.">Ca²⁺ Concentration</dt>
+        <dd>{{ synapse.spine.ca_concentration }} µM <span style="color:#888; font-size:0.9em;">(min: {{ computed.spine_min }}, max: {{ computed.spine_max }})</span>
+          {% if computed.spine_elevated %}
+            <span style="color:#2a6; font-size:0.9em;">(Elevated)</span>
+          {% else %}
+            <span style="color:#888; font-size:0.9em;">(Normal)</span>
+          {% endif %}
+        </dd>
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>Computed ca:</b> {{ computed.spine_ca }}<br>
+          <b>is_elevated:</b> {{ computed.spine_elevated }}<br>
+          <b>Min:</b> {{ computed.spine_min }}<br>
+          <b>Max:</b> {{ computed.spine_max }}
+        </dd>
+        {% endif %}
+        <dt title="Sensitivity to calcium.">Ca²⁺ Sensitivity</dt>
+        <dd>{{ synapse.spine.ca_sensitivity }}</dd>
+        <dt title="Is Ca²⁺ elevated?">Elevated</dt>
+        <dd>
+          {% if computed.spine_elevated %}
+            <span style="color:#2a6;">Yes</span> <span title="Elevated Ca²⁺">&#10003;</span>
+          {% else %}
+            <span style="color:#888;">No</span> <span title="Normal Ca²⁺">&#10007;</span>
+          {% endif %}
+        </dd>
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>Computed is_elevated:</b> {{ computed.spine_elevated }}<br>
+          <b>Min:</b> {{ computed.spine_min }}<br>
+          <b>Max:</b> {{ computed.spine_max }}
+        </dd>
+        {% endif %}
+      </dl>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="spine_influx">
+        <input type="number" step="0.01" name="amount" value="1.0" style="width:5em;" title="Amount of Ca²⁺ to add (µM)"> µM
+        <button type="submit" title="Add Ca²⁺ to the spine">Ca²⁺ Influx</button>
+      </form>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="spine_clear_ca">
+        <button type="submit" title="Clear Ca²⁺ from the spine">Clear Ca²⁺</button>
+      </form>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="spine_modulate_sensitivity">
+        <input type="number" step="0.01" name="pka_activity" value="1.0" style="width:5em;" title="PKA activity level"> (PKA activity)
+        <button type="submit" title="Modulate Ca²⁺ sensitivity">Modulate Sensitivity</button>
+      </form>
+    </div>
+
+
+    <div class="section">
+      <h2>Dopamine Cleft <span title="Space where dopamine is released for neuromodulation.">🛈</span></h2>
+      <div class="section-desc">Dopamine modulates synaptic plasticity by acting here.</div>
+      <dl>
+        <dt title="Current dopamine concentration in the cleft.">Dopamine</dt>
+        <dd>{{ synapse.da_cleft.dopamine }} mM <span style="color:#888; font-size:0.9em;">(min: {{ computed.da_cleft_min }}, max: {{ computed.da_cleft_max }})</span>
+          {% if computed.da_cleft_high %}
+            <span style="color:#2a6; font-size:0.9em;">(High)</span>
+          {% else %}
+            <span style="color:#888; font-size:0.9em;">(Normal)</span>
+          {% endif %}
+        </dd>
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>Computed level:</b> {{ computed.da_cleft_level }}<br>
+          <b>is_high:</b> {{ computed.da_cleft_high }}<br>
+          <b>Min:</b> {{ computed.da_cleft_min }}<br>
+          <b>Max:</b> {{ computed.da_cleft_max }}
+        </dd>
+        {% endif %}
+        <dt title="How quickly dopamine is cleared from the cleft.">Clear Rate</dt>
+        <dd>{{ synapse.da_cleft.clear_rate }} mM/tick</dd>
+        <dt title="Is dopamine high?">High</dt>
+        <dd>
+          {% if computed.da_cleft_high %}
+            <span style="color:#2a6;">Yes</span> <span title="High dopamine">&#10003;</span>
+          {% else %}
+            <span style="color:#888;">No</span> <span title="Normal dopamine">&#10007;</span>
+          {% endif %}
+        </dd>
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>Computed is_high:</b> {{ computed.da_cleft_high }}<br>
+          <b>Min:</b> {{ computed.da_cleft_min }}<br>
+          <b>Max:</b> {{ computed.da_cleft_max }}
+        </dd>
+        {% endif %}
+      </dl>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="da_release">
+        <input type="number" step="0.01" name="amount" value="0.8" style="width:5em;" title="Amount of dopamine to release (mM)"> mM
+        <button type="submit" title="Release dopamine into the cleft">Release Dopamine</button>
+      </form>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="da_clear">
+        <button type="submit" title="Clear dopamine from the cleft">Clear Dopamine</button>
+      </form>
+    </div>
+
+
+    <div class="section">
+      <h2>Dopamine Receptor <span title="Receptor that binds dopamine and triggers downstream effects.">🛈</span></h2>
+      <div class="section-desc">Binds dopamine to modulate the synaptic response.</div>
+      <dl>
+        <dt title="Is the receptor currently bound to dopamine?">Bound</dt>
+        <dd>
+          {% if computed.da_receptor_bound %}
+            <span style="color:#2a6;">Yes</span> <span title="Bound">&#10003;</span>
+          {% else %}
+            <span style="color:#888;">No</span> <span title="Unbound">&#10007;</span>
+          {% endif %}
+        </dd>
+        <dt title="Dissociation constant (affinity for dopamine).">Affinity</dt>
+        <dd>{{ computed.da_receptor_affinity }}</dd>
+        <dt title="Is receptor active?">Active</dt>
+        <dd>
+          {% if computed.da_receptor_active %}
+            <span style="color:#2a6;">Yes</span> <span title="Active">&#10003;</span>
+          {% else %}
+            <span style="color:#888;">No</span> <span title="Inactive">&#10007;</span>
+          {% endif %}
+        </dd>
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>Computed is_bound:</b> {{ computed.da_receptor_bound }}<br>
+          <b>is_active:</b> {{ computed.da_receptor_active }}<br>
+          <b>Affinity:</b> {{ computed.da_receptor_affinity }}
+        </dd>
+        {% endif %}
+      </dl>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="da_unbind">
+        <button type="submit" title="Unbind dopamine from the receptor">Unbind Dopamine Receptor</button>
+      </form>
+    </div>
+
+
+    <div class="section">
+      <h2>Modulatory Cascade <span title="Intracellular signaling cascade (cAMP/PKA) that modulates plasticity.">🛈</span></h2>
+      <div class="section-desc">cAMP/PKA pathway that amplifies and sustains synaptic changes.</div>
+      <dl>
+        <dt title="Current cAMP level.">cAMP</dt>
+        <dd>{{ synapse.cascade.camp }}
+          {% if synapse.cascade.camp > 1.0 %}
+            <span style="color:#2a6; font-size:0.9em;">(High)</span>
+          {% else %}
+            <span style="color:#888; font-size:0.9em;">(Normal)</span>
+          {% endif %}
+        </dd>
+        <dt title="Current PKA activity.">PKA Activity</dt>
+        <dd>{{ synapse.cascade.pka_activity }}
+          {% if synapse.cascade.pka_activity > 1.0 %}
+            <span style="color:#2a6; font-size:0.9em;">(Active)</span>
+          {% else %}
+            <span style="color:#888; font-size:0.9em;">(Basal)</span>
+          {% endif %}
+        </dd>
+        <dt title="Is the cascade active?">Active</dt>
+        <dd>
+          {% if computed.cascade_active %}
+            <span style="color:#2a6;">Yes</span> <span title="Active">&#10003;</span>
+          {% else %}
+            <span style="color:#888;">No</span> <span title="Basal">&#10007;</span>
+          {% endif %}
+        </dd>
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>Computed is_active:</b> {{ computed.cascade_active }}
+        </dd>
+        {% endif %}
+      </dl>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="cascade_activate">
+        <button type="submit" title="Activate the cAMP/PKA cascade">Activate Cascade</button>
+      </form>
+    </div>
+
+
+    <div class="section">
+      <h2>STDP Parameters <span title="Spike-timing dependent plasticity thresholds and rates.">🛈</span></h2>
+      <div class="section-desc">Defines how timing of spikes affects synaptic strength (LTP/LTD).</div>
+      <dl>
+        <dt title="Threshold for long-term potentiation.">LTP Threshold</dt>
+        <dd>{{ synapse.stdp_params.ltp_threshold }}</dd>
+        <dt title="Threshold for long-term depression.">LTD Threshold</dt>
+        <dd>{{ synapse.stdp_params.ltd_threshold }}</dd>
+        <dt title="Rate of potentiation.">LTP Rate</dt>
+        <dd>{{ synapse.stdp_params.ltp_rate }}</dd>
+        <dt title="Rate of depression.">LTD Rate</dt>
+        <dd>{{ synapse.stdp_params.ltd_rate }}</dd>
+      </dl>
+    </div>
+
+
+    <div class="section">
+      <h2>Trafficking Parameters <span title="Regulates AMPAR insertion/removal at the synapse.">🛈</span></h2>
+      <div class="section-desc">Controls how AMPA receptors are added or removed from the synapse.</div>
+      <dl>
+        <dt title="AMPAR insertion rate.">Insertion Rate</dt>
+        <dd>{{ computed.trafficking_insertion }}</dd>
+        <dt title="AMPAR removal rate.">Removal Rate</dt>
+        <dd>{{ computed.trafficking_removal }}</dd>
+        <dt title="Turnover Rate">Turnover Rate</dt>
+        <dd>{{ computed.trafficking_turnover_rate }}</dd>
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>Insertion:</b> {{ computed.trafficking_insertion }}<br>
+          <b>Removal:</b> {{ computed.trafficking_removal }}<br>
+          <b>Turnover Rate:</b> {{ computed.trafficking_turnover_rate }}
+        </dd>
+        {% endif %}
+      </dl>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="trafficking_compute_insertion">
+        <input type="number" step="0.01" name="delta_w" value="1.0" style="width:5em;" title="Change in synaptic weight (Δw)"> Δw
+        <button type="submit" title="Compute AMPAR insertion">Compute Insertion</button>
+      </form>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="trafficking_compute_removal">
+        <input type="number" step="0.01" name="delta_w" value="1.0" style="width:5em;" title="Change in synaptic weight (Δw)"> Δw
+        <button type="submit" title="Compute AMPAR removal">Compute Removal</button>
+      </form>
+    </div>
+
+
+    <div class="section">
+      <h2>AMPA Recycling Endosome <span title="Intracellular pool of AMPARs for rapid trafficking.">🛈</span></h2>
+      <div class="section-desc">Stores AMPA receptors for quick delivery to the synapse.</div>
+      <dl>
+        <dt title="Number of AMPARs in the endosome pool.">Pool Count</dt>
+        <dd>{{ computed.endosome_count }} <span style="color:#888; font-size:0.9em;">(min: {{ computed.endosome_min }}, max: {{ computed.endosome_max }})</span></dd>
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>Computed count:</b> {{ computed.endosome_count }}<br>
+          <b>Min:</b> {{ computed.endosome_min }}<br>
+          <b>Max:</b> {{ computed.endosome_max }}
+        </dd>
+        {% endif %}
+      </dl>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="endosome_remove">
+        <input type="number" name="count" value="1" style="width:4em;" title="Number of AMPARs to remove"> AMPARs
+        <button type="submit" title="Remove AMPARs from the pool">Remove AMPARs</button>
+      </form>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="endosome_add">
+        <input type="number" name="count" value="1" style="width:4em;" title="Number of AMPARs to add"> AMPARs
+        <button type="submit" title="Add AMPARs to the pool">Add AMPARs</button>
+      </form>
+    </div>
+
+
+    <div class="section">
+      <h2>PostSynaptic Density <span title="Region of the membrane with concentrated AMPARs.">🛈</span></h2>
+      <div class="section-desc">Where AMPA receptors are inserted to strengthen the synapse.</div>
+      <dl>
+        <dt title="Number of AMPARs at the synapse.">AMPAR Count</dt>
+        <dd>{{ computed.psd_count }} <span style="color:#888; font-size:0.9em;">(min: {{ computed.psd_min }}, max: {{ computed.psd_max }})</span></dd>
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>Computed count:</b> {{ computed.psd_count }}<br>
+          <b>Min:</b> {{ computed.psd_min }}<br>
+          <b>Max:</b> {{ computed.psd_max }}
+        </dd>
+        {% endif %}
+      </dl>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="psd_add">
+        <input type="number" name="count" value="1" style="width:4em;" title="Number of AMPARs to add"> AMPARs
+        <button type="submit" title="Add AMPARs to the PSD">Add AMPARs</button>
+      </form>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="psd_remove">
+        <input type="number" name="count" value="1" style="width:4em;" title="Number of AMPARs to remove"> AMPARs
+        <button type="submit" title="Remove AMPARs from the PSD">Remove AMPARs</button>
+      </form>
+    </div>
+
+
+    <div class="section">
+      <h2>Astrocyte <span title="Glial cell that senses activity and releases modulatory factors.">🛈</span></h2>
+      <div class="section-desc">Senses synaptic activity and releases factors that influence plasticity.</div>
+      <dl>
+        <dt title="Activity monitored by the astrocyte.">Monitored Activity</dt>
+        <dd>{{ computed.astrocyte_activity }} <span style="color:#888; font-size:0.9em;">(min: {{ computed.astrocyte_min }}, max: {{ computed.astrocyte_max }})</span></dd>
+        <dt title="Tumor necrosis factor alpha, a signaling molecule.">TNFα</dt>
+        <dd>{{ synapse.astrocyte.tnf_alpha }}</dd>
+        <dt title="D-serine, a co-agonist for NMDA receptors.">D-serine</dt>
+        <dd>{{ synapse.astrocyte.d_serine }}</dd>
+        <dt title="ATP, a signaling molecule.">ATP</dt>
+        <dd>{{ synapse.astrocyte.atp }}</dd>
+        <dt title="Rate of transmitter release.">Release Rate</dt>
+        <dd>{{ synapse.astrocyte.release_rate }}</dd>
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>Activity:</b> {{ computed.astrocyte_activity }}<br>
+          <b>Min:</b> {{ computed.astrocyte_min }}<br>
+          <b>Max:</b> {{ computed.astrocyte_max }}
+        </dd>
+        {% endif %}
+      </dl>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="astrocyte_sense_activity">
+        <input type="number" step="0.01" name="activity" value="1.0" style="width:5em;" title="Activity level to sense"> (activity)
+        <button type="submit" title="Sense synaptic activity">Sense Activity</button>
+      </form>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="astrocyte_clear_transmitters">
+        <button type="submit" title="Clear released transmitters">Clear Transmitters</button>
+      </form>
+    </div>
+
+
+    <div class="section">
+      <h2>Consolidation Protein Pool <span title="Supplies proteins for long-term synaptic changes.">🛈</span></h2>
+      <div class="section-desc">Provides proteins needed for long-term memory consolidation.</div>
+      <dl>
+        <dt title="Number of available proteins.">Available</dt>
+        <dd>{{ computed.pool_size }} <span style="color:#888; font-size:0.9em;">(min: {{ computed.pool_min }}, max: {{ computed.pool_max }})</span></dd>
+        <dt title="When the pool was last refilled.">Last Refilled</dt>
+        <dd>{{ synapse.pool.last_refilled }}</dd>
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>Computed size:</b> {{ computed.pool_size }}<br>
+          <b>Min:</b> {{ computed.pool_min }}<br>
+          <b>Max:</b> {{ computed.pool_max }}
+        </dd>
+        {% endif %}
+      </dl>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="pool_consume">
+        <button type="submit" title="Consume a protein from the pool">Consume Protein</button>
+      </form>
+    </div>
+
+    <div class="section">
+      <h2>Synaptic Tag <span title="Temporary marker for synapses eligible for consolidation.">🛈</span></h2>
+      <div class="section-desc">Marks the synapse for protein capture and consolidation.</div>
+      <dl>
+        <dt title="Is the synapse currently tagged?">Tagged</dt>
+        <dd>
+          {% if computed.tagged %}
+            <span style="color:#2a6;">Yes</span> <span title="Tagged">&#10003;</span>
+          {% else %}
+            <span style="color:#888;">No</span> <span title="Not tagged">&#10007;</span>
+          {% endif %}
+        </dd>
+        <dt title="Time when the tag was set.">Time Tagged</dt>
+        <dd>{{ synapse.tag.time_tagged|default:"–" }}</dd>
+        {% if show_details %}
+        <dt title="Advanced: Derived/extra fields">Details</dt>
+        <dd>
+          <b>Computed is_tagged:</b> {{ computed.tagged }}
+        </dd>
+        {% endif %}
+      </dl>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="tag_set">
+        <button type="submit" title="Set the synaptic tag">Set Tag</button>
+      </form>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="tag_clear">
+        <button type="submit" title="Clear the synaptic tag">Clear Tag</button>
+      </form>
+    </div>
   </div>
 </body>
 </html>
