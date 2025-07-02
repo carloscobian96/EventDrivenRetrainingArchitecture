@@ -1,0 +1,113 @@
+<!-- templates/synapse/plasticity_report.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Synaptic Plasticity Report</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 2em;
+    }
+    .container {
+      max-width: 720px;
+      margin: auto;
+      background: white;
+      padding: 2em;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    h1 {
+      margin-top: 0;
+      color: #345;
+    }
+    h2 {
+      margin: 1.4em 0 0.5em;
+      font-size: 1.2em;
+      color: #2a6;
+    }
+    dl {
+      margin: 0;
+    }
+    dt {
+      font-weight: bold;
+      color: #444;
+      margin-top: 0.5em;
+    }
+    dd {
+      margin: 0 0 0.5em 1em;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Synaptic State: Synapse {{ synapse.pk }}</h1>
+
+    <h2>Weight & Plasticity</h2>
+    <dl>
+      <dt>Weight</dt>
+      <dd>{{ synapse.weight }}</dd>
+      <dt>LTP Threshold</dt>
+      <dd>{{ synapse.stdp_params.ltp_threshold }}</dd>
+      <dt>LTD Threshold</dt>
+      <dd>{{ synapse.stdp_params.ltd_threshold }}</dd>
+    </dl>
+
+    <h2>Calcium Dynamics</h2>
+    <dl>
+      <dt>Ca²⁺ Concentration</dt>
+      <dd>{{ synapse.spine.ca_concentration }} µM</dd>
+      <dt>Ca²⁺ Sensitivity</dt>
+      <dd>{{ synapse.spine.ca_sensitivity }}</dd>
+    </dl>
+
+    <h2>Neurotransmitters</h2>
+    <dl>
+      <dt>Glutamate</dt>
+      <dd>{{ synapse.cleft.glutamate }} mM</dd>
+      <dt>Dopamine</dt>
+      <dd>{{ synapse.da_cleft.dopamine }} mM</dd>
+    </dl>
+
+    <h2>Receptor States</h2>
+    <dl>
+      <dt>NMDA Mg²⁺ Blocked</dt>
+      <dd>{{ synapse.nmda.mg_blocked }}</dd>
+      <dt>Dopamine Receptor Bound</dt>
+      <dd>{{ synapse.da_receptor.bound }}</dd>
+    </dl>
+
+    <h2>AMPAR Pools</h2>
+    <dl>
+      <dt>PSD AMPAR Count</dt>
+      <dd>{{ synapse.psd.ampa_count }}</dd>
+      <dt>Endosomal AMPAR Pool</dt>
+      <dd>{{ synapse.endosome.pool_count }}</dd>
+    </dl>
+
+    <h2>Tag & Consolidation</h2>
+    <dl>
+      <dt>Tagged</dt>
+      <dd>{{ synapse.tag.tagged }}</dd>
+      <dt>Time Tagged</dt>
+      <dd>{{ synapse.tag.time_tagged|default:"–" }}</dd>
+      <dt>Available Proteins</dt>
+      <dd>{{ synapse.pool.available }}</dd>
+    </dl>
+
+    <h2>Astrocyte Homeostasis</h2>
+    <dl>
+      <dt>TNFα</dt>
+      <dd>{{ synapse.astrocyte.tnf_alpha }}</dd>
+      <dt>D-serine</dt>
+      <dd>{{ synapse.astrocyte.d_serine }}</dd>
+      <dt>ATP</dt>
+      <dd>{{ synapse.astrocyte.atp }}</dd>
+    </dl>
+  </div>
+</body>
+</html>

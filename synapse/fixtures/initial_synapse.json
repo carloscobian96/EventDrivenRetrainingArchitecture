@@ -1,0 +1,17 @@
+[
+  {"model": "synapse.synapticcleft", "pk": 1, "fields": {"glutamate": 1.0, "clear_rate": 0.5}},
+  {"model": "synapse.dopaminecleft", "pk": 1, "fields": {"dopamine": 0.8, "clear_rate": 0.1}},
+  {"model": "synapse.nmdareceptor", "pk": 1, "fields": {"mg_blocked": true, "glutamate_thr": 1.0, "voltage_thr": -50.0}},
+  {"model": "synapse.dopaminereceptor", "pk": 1, "fields": {"bound": false, "kd": 0.5}},
+  {"model": "synapse.modulatorycascade", "pk": 1, "fields": {"camp": 0.0, "pka_activity": 0.0}},
+  {"model": "synapse.postsynapticmembrane", "pk": 1, "fields": {"rest_potential": -70.0, "potential": -70.0, "depolarization": 20.0}},
+  {"model": "synapse.spinehead", "pk": 1, "fields": {"ca_concentration": 0.0, "ca_sensitivity": 1.0}},
+  {"model": "synapse.stdpparameters", "pk": 1, "fields": {"ltp_threshold": 5.0, "ltd_threshold": 1.0, "ltp_rate": 0.01, "ltd_rate": 0.005}},
+  {"model": "synapse.synaptictag", "pk": 1, "fields": {"tagged": false, "time_tagged": null}},
+  {"model": "synapse.consolidationproteinpool", "pk": 1, "fields": {"available": 100, "last_refilled": "2025-07-02T00:00:00Z"}},
+  {"model": "synapse.amparecyclingendosome", "pk": 1, "fields": {"pool_count": 100}},
+  {"model": "synapse.postsynapticdensity", "pk": 1, "fields": {"ampa_count": 20}},
+  {"model": "synapse.traffickingparameters", "pk": 1, "fields": {"insertion_rate": 5.0, "removal_rate": 5.0}},
+  {"model": "synapse.astrocyte", "pk": 1, "fields": {"monitored_activity": 0.0, "tnf_alpha": 0.0, "d_serine": 0.0, "atp": 0.0, "release_rate": 0.1}},
+  {"model": "synapse.synapse", "pk": 1, "fields": {"cleft": 1, "da_cleft": 1, "membrane": 1, "nmda": 1, "da_receptor": 1, "cascade": 1, "spine": 1, "stdp_params": 1, "tag": 1, "pool": 1, "endosome": 1, "psd": 1, "traf_params": 1, "astrocyte": 1, "weight": 1.0}}
+]
