@@ -1,9 +1,16 @@
-from django.shortcuts import render
-from .models import Synapse
-
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.shortcuts import redirect
+
+from django.shortcuts import render
+from .models import Synapse
+
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def plasticity_diagram(request):
+    """Render the static plasticity cascade diagram page."""
+    return render(request, 'synapse/plasticity_diagram.html')
+
 
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
@@ -39,130 +46,51 @@ def plasticity_report(request):
     ]
     ACTIONS_DICT = dict(ACTIONS)
 
-    # --- Computed/derived values for UI ---
+    # --- Computed/derived values for UI (only real model attributes) ---
     computed = {}
-    # Cleft
-    try:
-        computed['cleft_is_active'] = getattr(syn.cleft, 'is_active', None)
-        computed['cleft_glutamate'] = getattr(syn.cleft, 'glutamate', None)
-        computed['cleft_min'] = getattr(syn.cleft, 'min', None)
-        computed['cleft_max'] = getattr(syn.cleft, 'max', None)
-    except Exception:
-        computed['cleft_is_active'] = None
-        computed['cleft_glutamate'] = None
-        computed['cleft_min'] = None
-        computed['cleft_max'] = None
-    # Membrane
-    try:
-        computed['membrane_potential'] = getattr(syn.membrane, 'potential', None)
-        computed['membrane_depolarized'] = getattr(syn.membrane, 'is_depolarized', None)
-        computed['membrane_min'] = getattr(syn.membrane, 'min', None)
-        computed['membrane_max'] = getattr(syn.membrane, 'max', None)
-    except Exception:
-        computed['membrane_potential'] = None
-        computed['membrane_depolarized'] = None
-        computed['membrane_min'] = None
-        computed['membrane_max'] = None
-    # NMDA
-    try:
-        computed['nmda_open'] = getattr(syn.nmda, 'is_open', None)
-        computed['nmda_blocked'] = getattr(syn.nmda, 'is_blocked', None)
-        computed['nmda_ca_conductance'] = getattr(syn.nmda, 'ca_conductance', None)
-        computed['nmda_min'] = getattr(syn.nmda, 'min', None)
-        computed['nmda_max'] = getattr(syn.nmda, 'max', None)
-    except Exception:
-        computed['nmda_open'] = None
-        computed['nmda_blocked'] = None
-        computed['nmda_ca_conductance'] = None
-        computed['nmda_min'] = None
-        computed['nmda_max'] = None
-    # Spine
-    try:
-        computed['spine_ca'] = getattr(syn.spine, 'ca', None)
-        computed['spine_elevated'] = getattr(syn.spine, 'is_elevated', None)
-        computed['spine_min'] = getattr(syn.spine, 'min', None)
-        computed['spine_max'] = getattr(syn.spine, 'max', None)
-    except Exception:
-        computed['spine_ca'] = None
-        computed['spine_elevated'] = None
-        computed['spine_min'] = None
-        computed['spine_max'] = None
-    # DA Cleft
-    try:
-        computed['da_cleft_level'] = getattr(syn.da_cleft, 'level', None)
-        computed['da_cleft_high'] = getattr(syn.da_cleft, 'is_high', None)
-        computed['da_cleft_min'] = getattr(syn.da_cleft, 'min', None)
-        computed['da_cleft_max'] = getattr(syn.da_cleft, 'max', None)
-    except Exception:
-        computed['da_cleft_level'] = None
-        computed['da_cleft_high'] = None
-        computed['da_cleft_min'] = None
-        computed['da_cleft_max'] = None
-    # DA Receptor
-    try:
-        computed['da_receptor_bound'] = getattr(syn.da_receptor, 'is_bound', None)
-        computed['da_receptor_active'] = getattr(syn.da_receptor, 'is_active', None)
-        computed['da_receptor_affinity'] = getattr(syn.da_receptor, 'affinity', None)
-    except Exception:
-        computed['da_receptor_bound'] = None
-        computed['da_receptor_active'] = None
-        computed['da_receptor_affinity'] = None
-    # Cascade
-    try:
-        computed['cascade_active'] = getattr(syn.cascade, 'is_active', None)
-    except Exception:
-        computed['cascade_active'] = None
-    # Tag
-    try:
-        computed['tagged'] = getattr(syn.tag, 'is_tagged', None)
-    except Exception:
-        computed['tagged'] = None
-    # Pool
-    try:
-        computed['pool_size'] = getattr(syn.pool, 'size', None)
-        computed['pool_min'] = getattr(syn.pool, 'min', None)
-        computed['pool_max'] = getattr(syn.pool, 'max', None)
-    except Exception:
-        computed['pool_size'] = None
-        computed['pool_min'] = None
-        computed['pool_max'] = None
-    # Endosome
-    try:
-        computed['endosome_count'] = getattr(syn.endosome, 'count', None)
-        computed['endosome_min'] = getattr(syn.endosome, 'min', None)
-        computed['endosome_max'] = getattr(syn.endosome, 'max', None)
-    except Exception:
-        computed['endosome_count'] = None
-        computed['endosome_min'] = None
-        computed['endosome_max'] = None
-    # PSD
-    try:
-        computed['psd_count'] = getattr(syn.psd, 'count', None)
-        computed['psd_min'] = getattr(syn.psd, 'min', None)
-        computed['psd_max'] = getattr(syn.psd, 'max', None)
-    except Exception:
-        computed['psd_count'] = None
-        computed['psd_min'] = None
-        computed['psd_max'] = None
-    # Trafficking
-    try:
-        computed['trafficking_insertion'] = getattr(syn.traffickingparams, 'insertion', None)
-        computed['trafficking_removal'] = getattr(syn.traffickingparams, 'removal', None)
-        computed['trafficking_turnover_rate'] = getattr(syn.traffickingparams, 'turnover_rate', None)
-    except Exception:
-        computed['trafficking_insertion'] = None
-        computed['trafficking_removal'] = None
-        computed['trafficking_turnover_rate'] = None
+    # SynapticCleft
+    computed['cleft_glutamate'] = getattr(syn.cleft, 'glutamate', None)
+    # DopamineCleft
+    computed['da_cleft_dopamine'] = getattr(syn.da_cleft, 'dopamine', None)
+    # NMDAReceptor
+    computed['nmda_mg_blocked'] = getattr(syn.nmda, 'mg_blocked', None)
+    computed['nmda_glutamate_thr'] = getattr(syn.nmda, 'glutamate_thr', None)
+    computed['nmda_voltage_thr'] = getattr(syn.nmda, 'voltage_thr', None)
+    # DopamineReceptor
+    computed['da_receptor_bound'] = getattr(syn.da_receptor, 'bound', None)
+    computed['da_receptor_kd'] = getattr(syn.da_receptor, 'kd', None)
+    # ModulatoryCascade
+    computed['cascade_camp'] = getattr(syn.cascade, 'camp', None)
+    computed['cascade_pka_activity'] = getattr(syn.cascade, 'pka_activity', None)
+    # PostSynapticMembrane
+    computed['membrane_potential'] = getattr(syn.membrane, 'potential', None)
+    computed['membrane_rest_potential'] = getattr(syn.membrane, 'rest_potential', None)
+    computed['membrane_depolarization'] = getattr(syn.membrane, 'depolarization', None)
+    # SpineHead
+    computed['spine_ca_concentration'] = getattr(syn.spine, 'ca_concentration', None)
+    computed['spine_ca_sensitivity'] = getattr(syn.spine, 'ca_sensitivity', None)
+    # STDPParameters
+    computed['ltp_threshold'] = getattr(syn.stdp_params, 'ltp_threshold', None)
+    computed['ltd_threshold'] = getattr(syn.stdp_params, 'ltd_threshold', None)
+    computed['ltp_rate'] = getattr(syn.stdp_params, 'ltp_rate', None)
+    computed['ltd_rate'] = getattr(syn.stdp_params, 'ltd_rate', None)
+    # SynapticTag
+    computed['tagged'] = getattr(syn.tag, 'tagged', None)
+    computed['time_tagged'] = getattr(syn.tag, 'time_tagged', None)
+    # ConsolidationProteinPool
+    computed['pool_available'] = getattr(syn.pool, 'available', None)
+    # AMPARecyclingEndosome
+    computed['endosome_pool_count'] = getattr(syn.endosome, 'pool_count', None)
+    # PostSynapticDensity
+    computed['psd_ampa_count'] = getattr(syn.psd, 'ampa_count', None)
+    # TraffickingParameters
+    computed['insertion_rate'] = getattr(syn.traf_params, 'insertion_rate', None)
+    computed['removal_rate'] = getattr(syn.traf_params, 'removal_rate', None)
     # Astrocyte
-    try:
-        computed['astrocyte_activity'] = getattr(syn.astrocyte, 'activity', None)
-        computed['astrocyte_min'] = getattr(syn.astrocyte, 'min', None)
-        computed['astrocyte_max'] = getattr(syn.astrocyte, 'max', None)
-    except Exception:
-        computed['astrocyte_activity'] = None
-        computed['astrocyte_min'] = None
-        computed['astrocyte_max'] = None
-    # Add more as needed for your models
+    computed['astrocyte_monitored_activity'] = getattr(syn.astrocyte, 'monitored_activity', None)
+    computed['astrocyte_tnf_alpha'] = getattr(syn.astrocyte, 'tnf_alpha', None)
+    computed['astrocyte_d_serine'] = getattr(syn.astrocyte, 'd_serine', None)
+    computed['astrocyte_atp'] = getattr(syn.astrocyte, 'atp', None)
 
     # --- Simple in-memory log/history (for demo only, not persistent) ---
     if not hasattr(plasticity_report, 'history_log'):

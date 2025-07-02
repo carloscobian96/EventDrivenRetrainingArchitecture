@@ -1,0 +1,195 @@
+<!--
+  Synaptic Plasticity Cascade Diagram
+  This page visually represents the cascade described in the README, styled to match the plasticity_report.html template.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Plasticity Cascade Diagram</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 2em;
+    }
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      background: white;
+      padding: 2em 1.2em;
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .cascade-diagram {
+      background: #f8fafc;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 2px 8px #0001;
+      overflow-x: auto;
+    }
+    .cascade-svg {
+      display: block;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 800px;
+      height: auto;
+    }
+    .cascade-box {
+      rx: 15;
+      stroke-width: 2;
+    }
+    .cascade-label {
+      font-size: 1.1em;
+      font-weight: 500;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+    .cascade-step {
+      font-size: 0.9em;
+      fill: #64748b;
+      text-anchor: middle;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2 class="mb-4">🧬 Plasticity Cascade Diagram</h2>
+  <div class="cascade-diagram">
+    <svg class="cascade-svg" viewBox="0 0 1200 1500" preserveAspectRatio="xMidYMin meet">
+      <!-- Synaptic Cleft -->
+      <!-- Synaptic Cleft -->
+      <rect x="500" y="40" width="220" height="70" class="cascade-box" fill="#e0e7ff" stroke="#6366f1"/>
+      <text x="610" y="80" class="cascade-label" fill="#3730a3">Synaptic Cleft</text>
+      <!-- Arrow to PostSyn Membrane -->
+      <!-- Arrow to PostSyn Membrane -->
+      <line x1="610" y1="110" x2="610" y2="210" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Arrow to NMDA Receptor (from cleft) -->
+      <line x1="720" y1="75" x2="950" y2="250" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- PostSyn Membrane -->
+      <!-- PostSyn Membrane -->
+      <rect x="500" y="210" width="220" height="70" class="cascade-box" fill="#fef9c3" stroke="#f59e42"/>
+      <text x="610" y="250" class="cascade-label" fill="#b45309">PostSyn Membrane</text>
+      <!-- Arrow to Ca2+ Influx -->
+      <line x1="610" y1="280" x2="610" y2="370" stroke="#b45309" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- NMDA Receptor (right of PostSyn Membrane) -->
+      <!-- NMDA Receptor (right of PostSyn Membrane) -->
+      <rect x="900" y="250" width="220" height="70" class="cascade-box" fill="#e0e7ff" stroke="#6366f1"/>
+      <text x="1010" y="290" class="cascade-label" fill="#3730a3">NMDA Receptor</text>
+      <!-- Arrow to Ca2+ Influx from NMDA -->
+      <line x1="1010" y1="320" x2="1010" y2="410" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Arrow from PostSyn Membrane to NMDA Receptor (voltage) -->
+      <line x1="720" y1="245" x2="900" y2="285" stroke="#b45309" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Ca2+ Influx (centered below) -->
+      <!-- Ca2+ Influx (centered below) -->
+      <rect x="800" y="410" width="220" height="70" class="cascade-box" fill="#f1f5f9" stroke="#0ea5e9"/>
+      <text x="910" y="450" class="cascade-label" fill="#0369a1">Ca²⁺ Influx</text>
+      <text x="910" y="470" class="cascade-step">step 1: Ca²⁺ enters spine via NMDA</text>
+      <!-- Dopamine Cleft (left) -->
+      <!-- Dopamine Cleft (left) -->
+      <rect x="60" y="40" width="220" height="70" class="cascade-box" fill="#e0e7ff" stroke="#6366f1"/>
+      <text x="170" y="80" class="cascade-label" fill="#3730a3">Dopamine Cleft</text>
+      <!-- Arrow to Dopamine Receptor -->
+      <line x1="170" y1="110" x2="170" y2="210" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Dopamine Receptor -->
+      <rect x="60" y="210" width="220" height="70" class="cascade-box" fill="#e0e7ff" stroke="#6366f1"/>
+      <text x="170" y="250" class="cascade-label" fill="#3730a3">Dopamine Receptor</text>
+      <!-- Arrow to Modulatory Cascade -->
+      <line x1="170" y1="280" x2="170" y2="370" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Modulatory Cascade -->
+      <rect x="60" y="370" width="220" height="70" class="cascade-box" fill="#fef9c3" stroke="#f59e42"/>
+      <text x="170" y="410" class="cascade-label" fill="#b45309">Modulatory Cascade</text>
+      <text x="170" y="430" class="cascade-step">step 2: cAMP/PKA pathway</text>
+      <!-- Arrow to SpineHead Ca2+ -->
+      <line x1="180" y1="370" x2="180" y2="440" stroke="#b45309" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- SpineHead Ca2+ -->
+      <rect x="60" y="510" width="220" height="70" class="cascade-box" fill="#f1f5f9" stroke="#0ea5e9"/>
+      <text x="170" y="550" class="cascade-label" fill="#0369a1">SpineHead Ca²⁺</text>
+      <text x="170" y="570" class="cascade-step">sensitivity updated</text>
+      <!-- Arrow from Ca2+ Influx to SpineHead Ca2+ -->
+      <line x1="910" y1="480" x2="170" y2="510" stroke="#0ea5e9" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Arrow from Modulatory Cascade to SpineHead Ca2+ (PKA modulates sensitivity) -->
+      <line x1="170" y1="440" x2="170" y2="510" stroke="#b45309" stroke-dasharray="6,6" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Arrow to STDP Parameters -->
+      <line x1="180" y1="490" x2="180" y2="560" stroke="#0ea5e9" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- STDP Parameters -->
+      <rect x="60" y="630" width="220" height="70" class="cascade-box" fill="#fef9c3" stroke="#f59e42"/>
+      <text x="170" y="670" class="cascade-label" fill="#b45309">STDP Parameters</text>
+      <text x="170" y="690" class="cascade-step">LTP/LTD thresholds</text>
+      <!-- Arrow from SpineHead Ca2+ to STDP -->
+      <line x1="170" y1="580" x2="170" y2="630" stroke="#b45309" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Arrow to Synaptic Weight -->
+      <line x1="180" y1="610" x2="180" y2="680" stroke="#b45309" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Synaptic Weight -->
+      <rect x="60" y="750" width="220" height="70" class="cascade-box" fill="#f1f5f9" stroke="#0ea5e9"/>
+      <text x="170" y="790" class="cascade-label" fill="#0369a1">Synaptic Weight</text>
+      <text x="170" y="810" class="cascade-step">step 3: weight change</text>
+      <!-- Arrow from STDP to Synaptic Weight -->
+      <line x1="170" y1="700" x2="170" y2="750" stroke="#0ea5e9" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Arrow to AMPA Trafficking -->
+      <line x1="180" y1="730" x2="180" y2="800" stroke="#0ea5e9" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- AMPA Trafficking Parameters -->
+      <rect x="60" y="870" width="220" height="70" class="cascade-box" fill="#e0e7ff" stroke="#6366f1"/>
+      <text x="170" y="910" class="cascade-label" fill="#3730a3">AMPA Trafficking</text>
+      <text x="170" y="930" class="cascade-step">step 4: AMPAR insertion/removal</text>
+      <!-- Arrow from Synaptic Weight to AMPA Trafficking -->
+      <line x1="170" y1="820" x2="170" y2="870" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Arrow from AMPA Trafficking to Synaptic Weight (feedback, efficacy) -->
+      <line x1="170" y1="940" x2="170" y2="790" stroke="#0ea5e9" stroke-dasharray="6,6" marker-end="url(#arrow)"/>
+      <!-- Endosome AMPA (right of AMPA Trafficking) -->
+      <rect x="350" y="870" width="220" height="70" class="cascade-box" fill="#fef9c3" stroke="#f59e42"/>
+      <text x="460" y="910" class="cascade-label" fill="#b45309">Endosome AMPA</text>
+      <!-- PSD AMPA Pool (right of Endosome AMPA) -->
+      <rect x="640" y="870" width="220" height="70" class="cascade-box" fill="#fef9c3" stroke="#f59e42"/>
+      <text x="750" y="910" class="cascade-label" fill="#b45309">PSD AMPA Pool</text>
+      <!-- Double arrow between Endosome and PSD AMPA Pool -->
+      <line x1="570" y1="905" x2="640" y2="905" stroke="#b45309" stroke-width="2" marker-end="url(#arrow)"/>
+      <line x1="640" y1="935" x2="570" y2="935" stroke="#b45309" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Arrow from AMPA Trafficking to Endosome/PSD -->
+      <line x1="280" y1="905" x2="350" y2="905" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Astrocyte Unit (below AMPA Trafficking) -->
+      <rect x="60" y="1050" width="220" height="70" class="cascade-box" fill="#e0e7ff" stroke="#6366f1"/>
+      <text x="170" y="1090" class="cascade-label" fill="#3730a3">Astrocyte Unit</text>
+      <text x="170" y="1110" class="cascade-step">step 5: feedback/scaling</text>
+      <!-- Arrow from PSD AMPA Pool to Astrocyte Unit (feedback) -->
+      <line x1="750" y1="905" x2="170" y2="1050" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Arrow from Astrocyte Unit to Synaptic Weight (scaling) -->
+      <line x1="170" y1="1120" x2="170" y2="790" stroke="#6366f1" stroke-dasharray="6,6" marker-end="url(#arrow)"/>
+      <!-- Arrow from Astrocyte Unit to Consolidation Protein Pool -->
+      <line x1="170" y1="1120" x2="170" y2="1210" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Consolidation Protein Pool -->
+      <rect x="60" y="1210" width="220" height="70" class="cascade-box" fill="#fef9c3" stroke="#f59e42"/>
+      <text x="170" y="1250" class="cascade-label" fill="#b45309">Consolidation Protein Pool</text>
+      <text x="170" y="1270" class="cascade-step">protein synthesis</text>
+      <!-- Arrow to Synaptic Tagging Logic -->
+      <line x1="170" y1="1280" x2="170" y2="1370" stroke="#b45309" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Synaptic Tagging Logic -->
+      <rect x="60" y="1370" width="220" height="70" class="cascade-box" fill="#e0e7ff" stroke="#6366f1"/>
+      <text x="170" y="1410" class="cascade-label" fill="#3730a3">Synaptic Tagging Logic</text>
+      <text x="170" y="1430" class="cascade-step">step 6: tag/mark for consolidation</text>
+      <!-- Arrow marker definition -->
+      <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+          <path d="M0,0 L0,6 L9,3 z" fill="#6366f1" />
+        </marker>
+      </defs>
+    </svg>
+    <div class="mt-4" style="text-align:center; color:#64748b; font-size:1.1em; max-width:700px; margin:2em auto 0 auto;">
+      <h3 style="margin-bottom:0.5em;">Cascade Steps</h3>
+      <ol style="text-align:left; margin:0 auto; max-width:600px;">
+        <li><b>Ca²⁺ Influx:</b> Calcium enters the spine via NMDA receptor, triggered by glutamate and depolarization.</li>
+        <li><b>Modulatory Cascade:</b> Dopamine activates cAMP/PKA pathway, modulating sensitivity and plasticity.</li>
+        <li><b>Synaptic Weight:</b> STDP parameters and Ca²⁺ signals drive LTP/LTD, changing synaptic strength.</li>
+        <li><b>AMPA Trafficking:</b> AMPARs are inserted/removed from the postsynaptic density/endosome.</li>
+        <li><b>Astrocyte Feedback:</b> Astrocyte senses activity and provides global scaling signals.</li>
+        <li><b>Tagging & Consolidation:</b> Protein pool and tagging logic mark the synapse for long-term change.</li>
+      </ol>
+      <em style="display:block; margin-top:1em;">Each box represents a biochemical or computational step in the synaptic plasticity cascade.<br>
+      Arrows indicate the flow of information or molecular events.<br>
+      Steps are labeled for reference to the README description.</em>
+    </div>
+  </div>
+</div>
+</body>
+</html>
