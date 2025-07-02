@@ -128,7 +128,7 @@ This project models the **biochemical and computational processes of synaptic pl
                    ▼
           ┌────────────────┐
           │ SpineHead Ca²⁺ │ ← sensitivity updated
-          └────┬────────────┘
+          └────┬───────────┘
                ▼
       ┌─────────────────────┐
       │   STDP Parameters   │
@@ -139,7 +139,7 @@ This project models the **biochemical and computational processes of synaptic pl
       └────┬────────────────┘
            ▼
  ┌───────────────────────────────┐
- │ AMPA Trafficking Parameters  │
+ │ AMPA Trafficking Parameters   │
  └────┬──────────────────────────┘
       ▼
 ┌────────────┐    ┌────────────────┐
@@ -170,64 +170,64 @@ This project models the **biochemical and computational processes of synaptic pl
 └──────────────────────────────────────────────────────────────┘
 
     [Event Signal]                          [Biological Signal]
-    ┌───────────────┐                  ┌────────────────────────┐
-    │ New Input /   │── anomaly spike ─▶│ Pre & Post action     │
-    │ Error Signal  │                  │ potentials (spikes)   │
-    └───────────────┘                  └────────────────────────┘
+    ┌───────────────┐                    ┌────────────────────────┐
+    │ New Input /   │── anomaly spike ─▶│ Pre & Post action      │
+    │ Error Signal  │                    │ potentials (spikes)    │
+    └───────────────┘                    └────────────────────────┘
                                             │
                                             ▼
 
     [Watcher]                         [Coincidence Detector]
     ┌───────────────────────┐ ◀─ Which spike pair ─▶ ┌────────────────────┐
-    │ Attention Gate        │     to focus on?      │ NMDA receptor      │
-    │ (selects event)       │     gating feedback   │ activation (Ca²⁺)  │
-    └───────────────────────┘                      └────────────────────┘
+    │ Attention Gate        │     to focus on?        │ NMDA receptor      │
+    │ (selects event)       │     gating feedback     │ activation (Ca²⁺)  │
+    └───────────────────────┘                         └────────────────────┘
                                             │
                                             ▼
 
     [Neuromodulatory Gate]           [Dopamine / Acetylcholine]
     ┌──────────────────────────┐ ◀─ Reward / Salience? ─▶ ┌─────────────────┐
-    │ Global Reward Signal     │     adjust plasticity    │ VTA / Basal     │
-    │ (modulates plasticity)   │                          │ forebrain       │
-    └──────────────────────────┘                          └─────────────────┘
+    │ Global Reward Signal     │     adjust plasticity     │ VTA / Basal     │
+    │ (modulates plasticity)   │                           │ forebrain       │
+    └──────────────────────────┘                           └─────────────────┘
                                             │
                                             ▼
 
     [Weaver]                         [Calcium-Driven Update]
     ┌───────────────────────┐ ◀─ Δweight = f(Δt, neuromod) ─▶ ┌────────────────────┐
-    │ Local Update Logic    │     update magnitude & sign     │ STDP rule (LTP/LTD)│
-    │ (computes weight Δ)   │                                 │ via Ca²⁺ influx    │
-    └───────────────────────┘                                 └────────────────────┘
+    │ Local Update Logic    │     update magnitude & sign      │ STDP rule (LTP/LTD)│
+    │ (computes weight Δ)   │                                  │ via Ca²⁺ influx    │
+    └───────────────────────┘                                  └────────────────────┘
                                             │
                                             ▼
 
     [Binder]                         [Receptor Trafficking]
     ┌────────────────────────┐ ── Commit Δ to synapse ─▶ ┌──────────────────────────┐
-    │ Parameter Adjustment   │     new synaptic strength │ AMPA receptor insertion/ │
+    │ Parameter Adjustment   │     new synaptic strength  │ AMPA receptor insertion/ │
     │ (apply local Δ)        │◀──────────────────────────┤ removal (weight change)  │
-    └────────────────────────┘     baseline sync         └──────────────────────────┘
+    └────────────────────────┘     baseline sync          └──────────────────────────┘
                                             │
                                             ▼
 
     [Homeostatic Control]               [Glial & Astrocyte Support]
     ┌────────────────────────┐ ◀─ Keep network stable ─▶ ┌──────────────────────────┐
-    │ Global Activity Scaling│     adjust overall gains  │ Astrocyte Ca²⁺ waves    │
-    │ (synaptic scaling)     │                           │ & gliotransmission      │
-    └────────────────────────┘                           └──────────────────────────┘
+    │ Global Activity Scaling│     adjust overall gains   │ Astrocyte Ca²⁺ waves     │
+    │ (synaptic scaling)     │                            │ & gliotransmission       │
+    └────────────────────────┘                            └──────────────────────────┘
                                             │
                                             ▼
 
     [Memory Consolidation]               [Systems-Level Stabilization]
     ┌────────────────────────┐ ◀─ Lock in useful Δ ─▶ ┌──────────────────────────┐
-    │ Store updated weights  │    gene expression &   │ Sleep-driven replay &   │
-    │ for future inference   │    protein synthesis   │ hippocampo-cortical loop│
-    └────────────────────────┘                        └──────────────────────────┘
+    │ Store updated weights  │    gene expression &    │ Sleep-driven replay &    │
+    │ for future inference   │    protein synthesis    │ hippocampo-cortical loop │
+    └────────────────────────┘                         └──────────────────────────┘
                                             │
                                             ▼
 
     [Adapted Behavior]                    [Modified Network Output]
     ┌──────────────────────────┐ ◀─ ongoing loop ─▶ ┌─────────────────────┐
-    │ Improved predictions /   │                   │ Enhanced circuit     │
-    │ decisions on next input  │                   │ efficacy & dynamics  │
-    └──────────────────────────┘                   └─────────────────────┘
+    │ Improved predictions /   │                     │ Enhanced circuit    │
+    │ decisions on next input  │                     │ efficacy & dynamics │
+    └──────────────────────────┘                     └─────────────────────┘
 ```
