@@ -95,14 +95,15 @@
       <dl>
         <dt title="Current glutamate concentration in the cleft.">Glutamate</dt>
         <dd>{{ synapse.cleft.glutamate }} mM <span style="color:#888; font-size:0.9em;">(min: {{ computed.cleft_min }}, max: {{ computed.cleft_max }})</span></dd>
+        <dt title="Presynaptic spike count (lifetime).">Spike Count</dt>
+        <dd>{{ synapse.cleft.spike_count }}</dd>
+        <dt title="Time of last presynaptic spike.">Last Spike Time</dt>
+        <dd>{{ synapse.cleft.last_spike_time|default:"–" }}</dd>
+        <dt title="Recent spikes (last 1s).">Recent Spikes (1s)</dt>
+        <dd>{{ computed.cleft_recent_spikes }}</dd>
         {% if show_details %}
-        <dt title="Advanced: Derived/extra fields">Details</dt>
-        <dd>
-          <b>Computed glutamate:</b> {{ computed.cleft_glutamate }}<br>
-          <b>is_active:</b> {{ computed.cleft_is_active }}<br>
-          <b>Min:</b> {{ computed.cleft_min }}<br>
-          <b>Max:</b> {{ computed.cleft_max }}
-        </dd>
+        <dt title="Spike history (timestamps)">Spike History</dt>
+        <dd style="max-height:5em; overflow:auto; font-size:0.93em; color:#888;">{{ synapse.cleft.spike_history|join:", " }}</dd>
         {% endif %}
         <dt title="How quickly glutamate is cleared from the cleft.">Clear Rate</dt>
         <dd>{{ synapse.cleft.clear_rate }} mM/tick</dd>
@@ -117,7 +118,8 @@
         {% if show_details %}
         <dt title="Advanced: Derived/extra fields">Details</dt>
         <dd>
-          <b>Computed is_active:</b> {{ computed.cleft_is_active }}<br>
+          <b>Computed glutamate:</b> {{ computed.cleft_glutamate }}<br>
+          <b>is_active:</b> {{ computed.cleft_is_active }}<br>
           <b>Min:</b> {{ computed.cleft_min }}<br>
           <b>Max:</b> {{ computed.cleft_max }}
         </dd>
@@ -131,8 +133,20 @@
       </form>
       <form method="post" style="display:inline;">
         {% csrf_token %}
+        <input type="hidden" name="action" value="cleft_noisy_release">
+        <input type="number" step="0.01" name="amount" value="1.2" style="width:5em;" title="Amount of glutamate to release (mM)"> mM
+        <input type="number" step="0.01" name="noise_std" value="0.1" style="width:4em;" title="Noise stddev"> noise
+        <button type="submit" title="Release glutamate with noise">Noisy Release</button>
+      </form>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
         <input type="hidden" name="action" value="cleft_clear">
         <button type="submit" title="Clear glutamate from the cleft">Clear Glutamate</button>
+      </form>
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="cleft_record_spike">
+        <button type="submit" title="Record a presynaptic spike">Record Spike</button>
       </form>
     </div>
 
@@ -257,15 +271,6 @@
             <span style="color:#888; font-size:0.9em;">(Normal)</span>
           {% endif %}
         </dd>
-        {% if show_details %}
-        <dt title="Advanced: Derived/extra fields">Details</dt>
-        <dd>
-          <b>Computed ca:</b> {{ computed.spine_ca }}<br>
-          <b>is_elevated:</b> {{ computed.spine_elevated }}<br>
-          <b>Min:</b> {{ computed.spine_min }}<br>
-          <b>Max:</b> {{ computed.spine_max }}
-        </dd>
-        {% endif %}
         <dt title="Sensitivity to calcium.">Ca²⁺ Sensitivity</dt>
         <dd>{{ synapse.spine.ca_sensitivity }}</dd>
         <dt title="Is Ca²⁺ elevated?">Elevated</dt>
@@ -275,6 +280,21 @@
           {% else %}
             <span style="color:#888;">No</span> <span title="Normal Ca²⁺">&#10007;</span>
           {% endif %}
+        </dd>
+        <dt title="Structural growth/shrinkage of the spine.">Spine Growth</dt>
+        <dd>
+          <form method="post" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="spine_grow">
+            <input type="number" step="0.01" name="delta" value="0.05" style="width:4em;" title="Growth increment">
+            <button type="submit" title="Grow the spine">Grow</button>
+          </form>
+          <form method="post" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="spine_shrink">
+            <input type="number" step="0.01" name="delta" value="0.05" style="width:4em;" title="Shrink increment">
+            <button type="submit" title="Shrink the spine">Shrink</button>
+          </form>
         </dd>
         {% if show_details %}
         <dt title="Advanced: Derived/extra fields">Details</dt>
@@ -299,8 +319,22 @@
       <form method="post" style="display:inline;">
         {% csrf_token %}
         <input type="hidden" name="action" value="spine_modulate_sensitivity">
-        <input type="number" step="0.01" name="pka_activity" value="1.0" style="width:5em;" title="PKA activity level"> (PKA activity)
-        <button type="submit" title="Modulate Ca²⁺ sensitivity">Modulate Sensitivity</button>
+        <div style="display:flex; align-items:center; gap:0.7em; margin-bottom:0.5em; flex-wrap:wrap;">
+          <input type="number" step="0.01" name="pka_activity" value="1.0" style="width:5em;" title="PKA activity level">
+          <span style="font-size:0.97em; color:#555;">(PKA activity)</span>
+          <button type="submit" title="Modulate Ca²⁺ sensitivity">Modulate Sensitivity</button>
+        </div>
+      </form>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="spine_buffer_and_pump">
+        <div style="display:flex; align-items:center; gap:0.7em; flex-wrap:wrap;">
+          <input type="number" step="0.01" name="buffer_capacity" value="2.0" style="width:4em;" title="Buffer capacity">
+          <span style="font-size:0.97em; color:#555;">Buffer capacity</span>
+          <input type="number" step="0.01" name="pump_rate" value="0.2" style="width:4em;" title="Pump rate">
+          <span style="font-size:0.97em; color:#555;">Pump rate</span>
+          <button type="submit" title="Buffer and pump Ca²⁺">Buffer & Pump</button>
+        </div>
       </form>
     </div>
 
@@ -643,6 +677,34 @@
         <input type="hidden" name="action" value="tag_clear">
         <button type="submit" title="Clear the synaptic tag">Clear Tag</button>
       </form>
+    </div>
+
+
+    <div class="section">
+      <h2>Synapse <span title="All biochemical components and plasticity state for this synapse.">🛈</span></h2>
+      <div class="section-desc">Summary of synaptic efficacy, event log, and advanced operations.</div>
+      <dl>
+        <dt title="Current synaptic weight (efficacy).">Weight</dt>
+        <dd>{{ synapse.weight }}</dd>
+        <dt title="Last plasticity event time.">Last Plasticity Time</dt>
+        <dd>{{ synapse.last_plasticity_time|default:"–" }}</dd>
+        <dt title="Plasticity Event Log">Event Log</dt>
+        <dd style="max-height:6em; overflow:auto; font-size:0.93em; color:#888;">{% for ev in synapse.history_log %}{{ ev.time }}: {{ ev.event }}<br>{% endfor %}</dd>
+        <dt title="Structural plasticity: prune or form synapse.">Structural Plasticity</dt>
+        <dd>
+          <form method="post" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="synapse_eliminate">
+            <button type="submit" title="Prune/eliminate synapse">Eliminate</button>
+          </form>
+          <form method="post" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="synapse_form">
+            <input type="number" step="0.01" name="initial_weight" value="1.0" style="width:4em;" title="Initial weight">
+            <button type="submit" title="Form/reactivate synapse">Form</button>
+          </form>
+        </dd>
+      </dl>
     </div>
   </div>
 </body>
