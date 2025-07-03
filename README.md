@@ -28,20 +28,48 @@ This project models the **biochemical and computational processes of synaptic pl
 
 ## 🗂️ Project Structure
 
+
 ```
 ├── event_driven_retraining/   # Django project config
 ├── synapse/                   # All domain logic, models, and views
 │   ├── models.py              # Biochemical and plasticity models
 │   ├── views.py               # Triggers and result rendering
+│   ├── services/
+│   │   └── simulator.py       # SynapseSimulator: full plasticity tick logic
+│   ├── management/
+│   │   └── commands/
+│   │       └── run_sim.py     # Django command: run simulation ticks for a synapse
 │   ├── templates/
 │   │   └── synapse/
-│   │       └── plasticity_cycle_result.html
+│   │       ├── plasticity_diagram.html
+│   │       └── plasticity_report.html
 │   └── ...
 ├── db.sqlite3                 # Default database
 ├── manage.py                  # Django management script
+├── manage.ps1                 # PowerShell: run Django commands with venv automatically
 ├── .gitignore                 # Git exclusions
 └── README.md                  # This file
 ```
+---
+
+## 🛠️ Key Scripts & Services
+
+- **manage.ps1**
+  - PowerShell script for running Django management commands using your project's virtual environment automatically.
+  - Usage: `./manage.ps1 <command> [args]`
+  - Example: `./manage.ps1 run_sim 1 --ticks 10`
+  - No need to activate your venv or adjust execution policy every time—this script handles it for you.
+
+- **synapse/services/simulator.py**
+  - Contains the `SynapseSimulator` class, which encapsulates the full synaptic plasticity tick logic.
+  - Each call to `tick()` simulates a full biochemical and computational update for a single synapse, including transmitter release, NMDA/AMPA logic, dopamine modulation, STDP, trafficking, tagging, and homeostasis.
+
+- **synapse/management/commands/run_sim.py**
+  - Custom Django management command to run simulation ticks for a given synapse.
+  - Usage: `python manage.py run_sim <synapse_id> --ticks <n>` or with PowerShell: `./manage.ps1 run_sim <synapse_id> --ticks <n>`
+  - Prints the synaptic weight after each tick for monitoring plasticity changes.
+
+---
 
 ---
 
